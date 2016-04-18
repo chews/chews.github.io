@@ -9,7 +9,7 @@
 // @include     http://youtube.com/*
 // @include     https://*.youtube.com/*
 // @include     https://youtube.com/*
-// @connect     googleapis.com
+// @connect     *
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
 // @namespace   https://openuserjs.org/users/lednerg
@@ -612,6 +612,19 @@ GM_addStyle(""+
 "        outline-color: #f00; "+
 "    } "+
 "} ");
+
+var myFirebaseRef = new Firebase("https://no1.firebaseio.com/");
+Firebase.enableLogging(true,true);
+
+myFirebaseRef.set({
+  title: "Hello 2324323423",
+  author: "Firebase",
+  location: {
+    city: "San Francisco",
+    state: "California",
+    zip: 94103
+  }
+});
 
 var lastScanTime = new Date().getTime();
 
