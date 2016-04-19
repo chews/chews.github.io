@@ -218,7 +218,7 @@ GM_addStyle(""+
 "    } "+
 "} ");
 
-var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/);
+var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/');
 
 
 scanVideos();
