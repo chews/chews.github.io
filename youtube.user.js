@@ -3,7 +3,7 @@
 // @description Highlights the most worthwhile videos on YouTube. In addition to a ratings bar, there's also a blue "Power Meter" which measures people's enthusiasm for videos.
 // @version     2016.04.02
 // @author      chews
-// @license     
+// @license     none
 // @icon        http://i.imgur.com/ZfKR597.png
 // @include     http://*.youtube.com/*
 // @include     http://youtube.com/*
@@ -298,7 +298,7 @@ function getGdata(node,videoId) {
                             likes: likes,
                             dislikes: dislikes
                         };
-                        var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/'+videoId)
+                        var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/'+videoId);
                         myFirebaseRef.set(json2save);
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
