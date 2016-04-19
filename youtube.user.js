@@ -20,7 +20,7 @@
 
 var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
-var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/');
+var myFirebaseRef = new Firebase('https://buyerchews.firebaseio.com/');
 Firebase.enableLogging(true,true);
 
 
@@ -296,7 +296,7 @@ function getGdata(node,videoId) {
                             likes: likes,
                             dislikes: dislikes
                         };
-                        var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/'+videoId);
+                        var myFirebaseRef = new Firebase('https://buyerchews.firebaseio.com/videos/'+videoId);
                         myFirebaseRef.set(json2save);
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
