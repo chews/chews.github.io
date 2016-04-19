@@ -20,7 +20,8 @@
 
 var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
-
+var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/');
+Firebase.enableLogging(true,true);
 
 
 GM_addStyle(""+
@@ -217,9 +218,6 @@ GM_addStyle(""+
 "        outline-color: #f00; "+
 "    } "+
 "} ");
-
-var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/');
-
 
 scanVideos();
 
