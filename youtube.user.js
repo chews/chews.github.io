@@ -21,6 +21,7 @@
 var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
 var myFirebaseRef = new Firebase('https://buyerchews.firebaseio.com/');
+Firebase.INTERNAL.forceWebSockets();
 Firebase.enableLogging(true,true);
 
 
