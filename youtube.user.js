@@ -215,15 +215,7 @@ GM_addStyle(""+
 var myFirebaseRef = new Firebase("https://n01.firebaseio.com/");
 Firebase.enableLogging(true,true);
 
-myFirebaseRef.set({
-  title: "Hello 2324323423",
-  author: "Firebase",
-  location: {
-    city: "San Francisco",
-    state: "California",
-    zip: 94103
-  }
-});
+
 
 var lastScanTime = new Date().getTime();
 
@@ -281,6 +273,7 @@ function getGdata(node,videoId) {
     if ( !node.classList.contains("gettingData") ) {
         node.classList.add('gettingData');
         setTimeout(function(){node.classList.toggle("gettingData");},1000);
+
         GM_xmlhttpRequest({
             method: 'GET',
             url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U&part=snippet,statistics&fields=items/statistics,items/snippet/publishedAt",
@@ -298,6 +291,13 @@ function getGdata(node,videoId) {
                             likes = 0;
                             dislikes = 0;
                         }
+                        myFirebaseRef.set({
+                          videoId: {
+                            views: views,
+                            likes: likes,
+                            dislikes: dislikes
+                          }
+                        });
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
                 }
