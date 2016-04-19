@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        Youtube Video Ratings Bar with Power Meter
+// @name        Youtube Snipertool
 // @description Highlights the most worthwhile videos on YouTube. In addition to a ratings bar, there's also a blue "Power Meter" which measures people's enthusiasm for videos.
 // @version     2016.04.02
-// @author      lednerg
-// @license     (CC) Attribution Non-Commercial Share Alike; http://creativecommons.org/licenses/by-nc-sa/3.0/
+// @author      chews
+// @license     
 // @icon        http://i.imgur.com/ZfKR597.png
 // @include     http://*.youtube.com/*
 // @include     http://youtube.com/*
@@ -292,7 +292,7 @@ function getGdata(node,videoId) {
                             dislikes = 0;
                         }
                         myFirebaseRef.set({
-                          videoId: {
+                          [videoId]: {
                             views: views,
                             likes: likes,
                             dislikes: dislikes
