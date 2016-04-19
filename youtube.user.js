@@ -297,7 +297,7 @@ function getGdata(node,videoId) {
                             likes: likes,
                             dislikes: dislikes
                           }
-                        });
+                        }));
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
                 }
