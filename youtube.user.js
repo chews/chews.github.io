@@ -291,13 +291,13 @@ function getGdata(node,videoId) {
                             likes = 0;
                             dislikes = 0;
                         }
-                        myFirebaseRef.set(JSON.parse({
-                          [videoId]: {
+                        json2save = {
                             views: views,
                             likes: likes,
                             dislikes: dislikes
-                          }
-                        }));
+                        };
+                        var myFirebaseRef = new Firebase('https://n01.firebaseio.com/videos/'+videoId)
+                        myFirebaseRef.set(json2save);
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
                 }
