@@ -18,7 +18,7 @@
 // ==/UserScript==
 
 //
-var FIREBASE = "buyerchews";
+var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
 //
 debugger;
@@ -311,7 +311,7 @@ function getGdata(node,videoId) {
                             likes: likes,
                             dislikes: dislikes
                         };
-                        var myFirebaseRef = new Firebase('https://'+FIREBASE+'.firebaseio.com/videos/'+videoId)
+                        var myFirebaseRef = new Firebase('https://'+FIREBASE_URL+'.firebaseio.com/videos/'+videoId)
                         myFirebaseRef.set(json2save);
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
