@@ -17,6 +17,12 @@
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
 
+//////////////////////////////////////////////
+var FIREBASE = "buyerchews"
+var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U"
+//////////////////////////////////////////////
+debugger;
+
 GM_addStyle(""+
 ".ratingsBar:hover > .likesBar, "+
 ".ratingsBar:hover > .dislikesBar, "+
@@ -212,12 +218,21 @@ GM_addStyle(""+
 "    } "+
 "} ");
 
-var myFirebaseRef = new Firebase("https://n01.firebaseio.com/");
-Firebase.enableLogging(true,true);
-
-
 
 var lastScanTime = new Date().getTime();
+
+var storedObject = JSON.parse( GM_getValue("settings", "{}") ); 
+
+if(!storedObject) {
+  //JSON.parse() should never return any value that type-casts to false, assume there is an 
+  //   error in the input string
+  GM_log('Error! JSON.parse failed - The stored value for "foo" is likely to be corrupted.');
+  throw;
+}
+
+function getSettings(){
+    
+}
 
 scanVideos();
 
@@ -276,7 +291,7 @@ function getGdata(node,videoId) {
 
         GM_xmlhttpRequest({
             method: 'GET',
-            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U&part=snippet,statistics&fields=items/statistics,items/snippet/publishedAt",
+            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key="+GOOGLE_API_KEY+"&part=snippet,statistics&fields=items/statistics,items/snippet/publishedAt",
             onload: function(response) {
                 if (response.status === 200) {
                     //var rsp = eval( '(' + response.responseText + ')' ); // if you know a way to do this without eval, let me know
@@ -296,7 +311,7 @@ function getGdata(node,videoId) {
                             likes: likes,
                             dislikes: dislikes
                         };
-                        var myFirebaseRef = new Firebase('https://n01.firebaseio.com/videos/'+videoId)
+                        var myFirebaseRef = new Firebase('https://'+FIREBASE+'.firebaseio.com/videos/'+videoId)
                         myFirebaseRef.set(json2save);
                         makeBar(node, daysAgo, views, likes, dislikes);
                     }
