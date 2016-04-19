@@ -17,10 +17,10 @@
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
 
-//
+
 var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
-//
+
 
 
 GM_addStyle(""+
@@ -219,21 +219,6 @@ GM_addStyle(""+
 "} ");
 
 
-var lastScanTime = new Date().getTime();
-
-var storedObject = JSON.parse( GM_getValue("settings", "{}") ); 
-
-if(!storedObject) {
-  //JSON.parse() should never return any value that type-casts to false, assume there is an 
-  //   error in the input string
-  GM_log('Error! JSON.parse failed - The stored value for "foo" is likely to be corrupted.');
-  throw;
-}
-
-function getSettings(){
-
-}
-
 scanVideos();
 
 // On some pages, YouTube adds thumbnails as you scroll down the page,
@@ -291,7 +276,7 @@ function getGdata(node,videoId) {
 
         GM_xmlhttpRequest({
             method: 'GET',
-            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key="+GOOGLE_API_KEY+"&part=snippet,statistics&fields=items/statistics,items/snippet/publishedAt",
+            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key="+GOOGLE_API_KEY+"&part=snippet,statistics,topicDetails&fields=items/statistics,items/snippet/publishedAt",
             onload: function(response) {
                 if (response.status === 200) {
                     //var rsp = eval( '(' + response.responseText + ')' ); // if you know a way to do this without eval, let me know
