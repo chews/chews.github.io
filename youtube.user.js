@@ -21,7 +21,7 @@
 var FIREBASE_URL = "buyerchews";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
 //
-debugger;
+
 
 GM_addStyle(""+
 ".ratingsBar:hover > .likesBar, "+
