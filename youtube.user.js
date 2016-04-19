@@ -304,6 +304,18 @@ function getGdata(node,videoId) {
                 }
             }
         });
+        var ptkreg = /\"ptk\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: "https://www.youtube.com/watch?v=" + videoId,
+            onload: function(response) {
+                if (response.status === 200) {
+                    var rsp = ptkreg.exec(response.responseText);
+                    console.log(rsp);
+                    }
+                }
+            }
+        });
     }
 }
 
