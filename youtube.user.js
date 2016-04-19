@@ -291,7 +291,7 @@ function getGdata(node,videoId) {
                             likes = 0;
                             dislikes = 0;
                         }
-                        myFirebaseRef.set({
+                        myFirebaseRef.set(JSON.parse({
                           [videoId]: {
                             views: views,
                             likes: likes,
