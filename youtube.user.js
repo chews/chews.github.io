@@ -17,10 +17,10 @@
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
 
-//////////////////////////////////////////////
-var FIREBASE = "buyerchews"
-var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U"
-//////////////////////////////////////////////
+//
+var FIREBASE = "buyerchews";
+var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
+//
 debugger;
 
 GM_addStyle(""+
@@ -231,7 +231,7 @@ if(!storedObject) {
 }
 
 function getSettings(){
-    
+
 }
 
 scanVideos();
