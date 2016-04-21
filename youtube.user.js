@@ -9,20 +9,24 @@
 // @include     http://youtube.com/*
 // @include     https://*.youtube.com/*
 // @include     https://youtube.com/*
+// @connect     googleapis.com
+// @connect     firebase.com
+// @connect     firebaseIO.com
 // @connect     *
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
+// @grant       GM_notification
 // @namespace   https://openuserjs.org/users/lednerg
 // @require     http://code.jquery.com/jquery-1.11.1.min.js
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
 
 
-var FIREBASE_URL = "buyerchews";
+var FIREBASE_URL = "n01";
 var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
-var myFirebaseRef = new Firebase('https://buyerchews.firebaseio.com/');
+var myFirebaseRef = new Firebase('https://n01.firebaseio.com/');
 Firebase.INTERNAL.forceWebSockets();
-Firebase.enableLogging(true,true);
+//Firebase.enableLogging(true,true);
 
 
 GM_addStyle(""+
@@ -41,7 +45,7 @@ GM_addStyle(""+
 "                    .powerBar, "+
 "                    .hatesBar { "+
 "  transition: height .25s .0s; "+
-"   height: 4px; "+
+"   height: 8px; "+
 "  position: absolute; "+
 "  bottom: 0px; "+
 "  } "+
@@ -219,7 +223,8 @@ GM_addStyle(""+
 "        outline-color: #f00; "+
 "    } "+
 "} ");
-
+var report_results = false; // whether or not to report total views on page
+var total_veiws_on_page = 0;
 scanVideos();
 
 // On some pages, YouTube adds thumbnails as you scroll down the page,
@@ -234,8 +239,20 @@ window.onscroll = function() {
 };
 
 // Detecting YouTube's SPF processes, which redraw pages without reloading
-document.addEventListener("spfprocess", scanVideos);
-document.addEventListener("spfdone", scanVideos);
+document.addEventListener("spfprocess", pageChange);
+document.addEventListener("spfdone", pageChange);
+
+function pageChange(){
+    total_veiws_on_page = 0;
+    if (window.location.href.indexOf('results?search_query') == -1) {
+        console.log('on normal page');
+        scanVideos();
+    } else {
+        console.log('on Search page');
+        report_results = true;
+        scanVideos();
+    }
+}
 
 // Detecting Load More button animation
 var feedContainer = $(".feed-container, #body-container, #watch-related");
@@ -244,6 +261,18 @@ function buttonListen(feedContainer) {
     $("#body-container, .feed-container, #watch-related, .grid-lockups-container").bind("animationstart webkitAnimationStart oAnimationStart MSAnimationStart", function(){ scanVideos();});
     $("#body-container, .feed-container, #watch-related, .grid-lockups-container").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ scanVideos();});
 }
+
+function debounce(fn, delay) {
+  var timer = null;
+  return function () {
+    var context = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fn.apply(context, args);
+    }, delay);
+  };
+}
+
 
 function scanVideos() {
     lastScanTime = new Date().getTime();
@@ -270,14 +299,18 @@ function scanVideos() {
     }
 }
 
+function displayNotice(){
+    //GM_notification("Total Views for Search:"+format(total_veiws_on_page));
+    //total_veiws_on_page = 0;
+}
+
 function getGdata(node,videoId) {
     if ( !node.classList.contains("gettingData") ) {
         node.classList.add('gettingData');
         setTimeout(function(){node.classList.toggle("gettingData");},1000);
-
         GM_xmlhttpRequest({
             method: 'GET',
-            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key="+GOOGLE_API_KEY+"&part=snippet,statistics,topicDetails&fields=items/statistics,items/snippet/publishedAt",
+            url: "https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key="+GOOGLE_API_KEY+"&part=snippet,statistics,topicDetails&fields=items/statistics,items/snippet/publishedAt,items/topicDetails",
             onload: function(response) {
                 if (response.status === 200) {
                     //var rsp = eval( '(' + response.responseText + ')' ); // if you know a way to do this without eval, let me know
@@ -287,31 +320,56 @@ function getGdata(node,videoId) {
                         var views = parseInt(rsp.items[0].statistics.viewCount, 10);
                         var likes = parseInt(rsp.items[0].statistics.likeCount, 10);
                         var dislikes = parseInt(rsp.items[0].statistics.dislikeCount, 10);
+                        console.log(rsp.items[0]);
                         if (isNaN(likes) || isNaN(dislikes)) {
                             views = 0;
                             likes = 0;
                             dislikes = 0;
                         }
-                        json2save = {
-                            views: views,
-                            likes: likes,
-                            dislikes: dislikes
-                        };
-                        var myFirebaseRef = new Firebase('https://buyerchews.firebaseio.com/videos/'+videoId);
-                        myFirebaseRef.set(json2save);
-                        makeBar(node, daysAgo, views, likes, dislikes);
-                    }
-                }
-            }
-        });
-        var ptkreg = /\"ptk\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
-        GM_xmlhttpRequest({
-            method: 'GET',
-            url: "https://www.youtube.com/watch?v=" + videoId,
-            onload: function(response) {
-                if (response.status === 200) {
-                    var rsp = ptkreg.exec(response.responseText);
-                    console.log(rsp);
+                        total_veiws_on_page = total_veiws_on_page+views;
+                        if (jQuery('.num-results').length > 0 && jQuery('.total_veiws_on_page').length ==0 ) {
+                            jQuery('.num-results').append("<br><p class='total_veiws_on_page'>total views:"+total_veiws_on_page+"</p>")
+
+                        } else{
+                            if (jQuery('.total_veiws_on_page').length == 1){
+                                jQuery('.total_veiws_on_page').text("total views on page:"+format(total_veiws_on_page)); 
+                            }
+                        }
+
+                        GM_xmlhttpRequest({
+                            method: 'GET',
+                            url: "https://www.youtube.com/watch?v=" + videoId,
+                            onload: function(response) {
+                                if (response.status === 200) {
+                                    var ptkreg = /\"ptk\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
+                                    var ptkrsp = ptkreg.exec(response.responseText);
+                                    var ucidreg = /\"ucid\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
+                                    var ucidrsp = ucidreg.exec(response.responseText);
+                                    var ptk = 853853853;
+                                    try {
+                                        ptk = ptkrsp[1];
+                                    } catch(e) {
+                                        //do nothing
+                                    }
+                                    try {
+                                        if (ucidrsp[1].indexOf(ptkrsp[1]) !== -1){
+                                            ptk = "youtube_self"
+                                        }
+                                    } catch(e){
+                                        //do nothing
+                                    }
+                                    json2save = {
+                                        views: views,
+                                        likes: likes,
+                                        dislikes: dislikes,
+                                        ptk:ptk
+                                    };
+                                    var myFirebaseRef = new Firebase('https://n01.firebaseio.com/videos/'+videoId);
+                                    myFirebaseRef.set(json2save);
+                                    makeBar(node, daysAgo, views, likes, dislikes, ptk);
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -332,65 +390,36 @@ function format(n) {
 }
 
 // the ratings bar is made up of differently colored divs stacked on top of each other
-function makeBar(node, daysAgo, views, likes, dislikes) {
+function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
     var container = document.createElement('div');
     container.classList.add('ratingsBar');
     var barMsg = "";
-    var pausedMsg = "";
+    var pausedMsg = ptk;
     var pausedBar = false;
     var totalVotes = likes + dislikes;
+    var dislikesBar = document.createElement('div');
     if (dislikes > 0) {
-        var dislikesBar = document.createElement('div');
-        dislikesBar.classList.add('dislikesBar');
+        dislikesBar.setAttribute("style","width:100%;");
         container.appendChild(dislikesBar);
+    }   
+    switch(ptk){
+        case "youtube_none":
+        var bartype = 'likesBar';
+        break;
+        case "youtube_self":
+        var bartype = 'pausedBar';
+        break;
+        default:
+        var bartype = 'dislikesBar';
+        break;
     }
-    // Checks to see if there are more votes than views, which would mean the view count is wrong.
-    // We do this because we need an accurate view count to calculate the Power Meter.
-    // The green/yellow 'pausedBar' lets the user know that we can't make one yet, but at least the likesBar/red ratings bar is still available
-    if (totalVotes > views) {
-        if (likes > 0) {
-            pausedBar = document.createElement('div');
-            pausedBar.classList.add('pausedBar');
-            pausedBar.setAttribute("style","width:"+ (100 * likes / totalVotes) +"%;");
-            container.appendChild(pausedBar);
-        }
-        pausedMsg = '<span class="powerScore"><i>&nbsp;View Count Error&nbsp;</i></span>';
-    }
-    else {
-        powerMeterScore = powerMeter(views, likes, dislikes);
-        if (likes > 0) {
-            var likesBar = document.createElement('div');
-            likesBar.classList.add('likesBar');
-            likesBar.setAttribute("style","width:"+(100 * likes / totalVotes)+"%;");
-            container.appendChild(likesBar);
-        }
-       // shadingBar gives the ratings bar a 3D look when hovered
-       var shadingBar = document.createElement('div');
-        if ((likes + dislikes) > 0) { shadingBar.classList.add('shadingBar'); }
-       container.appendChild(shadingBar);
-        if ((100 * likes / totalVotes) < powerMeterScore) {
-            var hatesBar = document.createElement('div');
-            hatesBar.classList.add('hatesBar');
-            hatesBar.setAttribute("style","width:"+(powerMeterScore - (100 * likes / totalVotes))+"%; margin-left: "+(100 * likes / totalVotes)+"%;");
-            container.appendChild(hatesBar);
-        } 
-        if (powerMeterScore >= 0.0455) {
-            var powerBar = document.createElement('div');
-            powerBar.classList.add('powerBar');
-            if ((100 * likes / totalVotes) > powerMeterScore) {
-                powerBar.style.width = powerMeterScore+"%";
-            }
-            else {
-                powerBar.style.width = ((100 * likes / totalVotes))+"%";
-            }
-            barMsg = '<span class="powerScore">&nbsp;<span style="color:#99ddff">'+ Math.round(powerMeterScore*10)/10 +'</span>&nbsp;</span>';
-            container.appendChild(powerBar);
-        }
-    }
+    dislikesBar.classList.add(bartype);
+
+
     if (likes > 0 || dislikes > 0) {
       var textContainer = document.createElement('span');
       textContainer.classList.add('textContainer');
-      if (((likes + dislikes) > 0) && (powerMeterScore < 0.0455 || pausedBar)) {textContainer.classList.add('short');}
+      //if (((likes + dislikes) > 0) && (powerMeterScore < 0.0455 || pausedBar)) {textContainer.classList.add('short');}
       var textBar = document.createElement('span');
       textBar.classList.add('textBar');
       textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span></span>';
@@ -401,27 +430,4 @@ function makeBar(node, daysAgo, views, likes, dislikes) {
         node.insertBefore(container,node.childNodes[2]);
         node.classList.add('scanned');
     }
-}
-
-// trade secrets
-function powerMeter(view1, likes, dislikes) {
-    var viewLikeRatio;
-    var views = view1 - dislikes;
-    if (views < 2000) {
-        var viewLikeRatio2k = Math.round( (views + views * ((3000-views)/2000)) / (likes) );
-        if (views < 255) {
-            viewLikeRatio = Math.round( viewLikeRatio2k / (views/255) );
-        } 
-        else {
-            viewLikeRatio = viewLikeRatio2k;
-        }
-    }
-    else {
-        viewLikeRatio = Math.round( (views+7000) / 3 / (likes) );
-    }
-    if ((viewLikeRatio < 1) || (viewLikeRatio > 255)) {
-        return 0;
-    }
-    var powerMeterScore = Math.round(Math.pow(((255-viewLikeRatio)/2.55), 3)) / 10000;
-    return powerMeterScore;
 }
