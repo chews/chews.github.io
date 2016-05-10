@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        Youtube Snipertool
+// @name        Youtube Buyer HUD
 // @description Highlights the most worthwhile videos on YouTube. In addition to a ratings bar, there's also a blue "Power Meter" which measures people's enthusiasm for videos.
 // @version     2016.04.02
 // @author      chews
 // @license     none
-// @icon        http://i.imgur.com/ZfKR597.png
+// @icon        http://i.imgur.com/R7vzrFv.png
 // @include     http://*.youtube.com/*
 // @include     http://youtube.com/*
 // @include     https://*.youtube.com/*
