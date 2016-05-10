@@ -17,7 +17,6 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_notification
 // @grant       GM_setClipboard
-// @namespace   https://openuserjs.org/users/lednerg
 // @require     http://code.jquery.com/jquery-1.11.1.min.js
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
