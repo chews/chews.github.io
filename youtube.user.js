@@ -16,6 +16,7 @@
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
 // @grant       GM_notification
+// @grant       GM_setClipboard
 // @namespace   https://openuserjs.org/users/lednerg
 // @require     http://code.jquery.com/jquery-1.11.1.min.js
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
@@ -23,7 +24,9 @@
 
 
 var FIREBASE_URL = "n01";
-var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
+//var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
+var GOOGLE_API_KEY = "AIzaSyBw1ecqBONqO4y8L9nRK0vBByMliYJHhto";
+
 var myFirebaseRef = new Firebase('https://n01.firebaseio.com/');
 Firebase.INTERNAL.forceWebSockets();
 //Firebase.enableLogging(true,true);
@@ -244,6 +247,10 @@ document.addEventListener("spfdone", pageChange);
 
 function pageChange(){
     total_veiws_on_page = 0;
+    if (window.location.href.indexOf('/watch') !== -1) {
+        console.log('on watch page');
+        setTimeout(watchpage,1500);
+    } 
     if (window.location.href.indexOf('results?search_query') == -1) {
         console.log('on normal page');
         scanVideos();
@@ -262,6 +269,20 @@ function buttonListen(feedContainer) {
     $("#body-container, .feed-container, #watch-related, .grid-lockups-container").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ scanVideos();});
 }
 
+function watchpage(){
+    console.log("WATCHPAGE");
+    if (jQuery("#n01-header").length === 0)
+    {
+        jQuery("#watch-header").after("<div id='n01-header' class='yt-card yt-card-has-padding'><p>ucid:<input id='#ucid' type='text' style='width:300px;' onfocus='this.select()' readonly='readonly' value='"+ytplayer.config.args.ucid+"'></p>  <p>ptk:<input id='#ptk' type='text' style='width:300px;' onfocus='this.select()' readonly='readonly' value='"+ytplayer.config.args.ptk+"'></p>   <p>oid:<input id='#oid' type='text' style='width:300px;' onfocus='this.select()' readonly='readonly' value='"+ytplayer.config.args.oid+"'></p>   <p>keywords:"+ytplayer.config.args.keywords+"</p><p>in buytool:</p></div>");
+        jQuery("#action-panel-overflow-button").click();
+        jQuery("button[data-trigger-for='action-panel-stats']").click();
+        jQuery('.watch-action-panels').css('display','block');
+        jQuery('.watch-action-panels').height(393);
+        jQuery("button[data-mode-css='stats-mode-daily']").click();
+    }
+}
+
+
 function debounce(fn, delay) {
   var timer = null;
   return function () {
@@ -275,11 +296,14 @@ function debounce(fn, delay) {
 
 
 function scanVideos() {
+    if(window.top !== window.self) return; // bail if not top frame.
     lastScanTime = new Date().getTime();
+    //console.log('scanningvideos');
     // makes a list of video links which are not in the ".scanned" class yet. Once they are scanned, they will be added to it.
     var videoList = document.querySelectorAll('a.yt-uix-sessionlink[href^="/watch"] > .yt-thumb:not(.scanned):not(.gettingData), a.yt-uix-sessionlink[href^="/watch"] > .yt-uix-simple-thumb-wrap:not(.scanned):not(.gettingData)') ;
     var wallList = document.querySelectorAll('a.videowall-still[href*="/watch"]:not(.scanned):not(.gettingData)');
     if (videoList.length > 0) {
+        //console.log('got video list');
         for ( var i = 0; i < videoList.length; i++ ) {
             // searches for the video id number which we'll use to poll YouTube for ratings information
             var videoId = videoList[i].parentNode.getAttribute("href").replace(/.*[v|s]=([^&%]*).*/, "$1");
@@ -321,7 +345,7 @@ function getGdata(node,videoId) {
                         var views = parseInt(rsp.items[0].statistics.viewCount, 10);
                         var likes = parseInt(rsp.items[0].statistics.likeCount, 10);
                         var dislikes = parseInt(rsp.items[0].statistics.dislikeCount, 10);
-                        console.log(rsp.items[0]);
+                        //console.log(rsp.items[0]);
                         if (isNaN(likes) || isNaN(dislikes)) {
                             views = 0;
                             likes = 0;
@@ -329,7 +353,7 @@ function getGdata(node,videoId) {
                         }
                         total_veiws_on_page = total_veiws_on_page+views;
                         if (jQuery('.num-results').length > 0 && jQuery('.total_veiws_on_page').length ==0 ) {
-                            jQuery('.num-results').append("<br><p class='total_veiws_on_page'>total views:"+total_veiws_on_page+"</p>")
+                            jQuery('.num-results').append("<br><p class='total_veiws_on_page'>total views:"+total_veiws_on_page+"</p>");
 
                         } else{
                             if (jQuery('.total_veiws_on_page').length == 1){
@@ -354,7 +378,7 @@ function getGdata(node,videoId) {
                                     }
                                     try {
                                         if (ucidrsp[1].indexOf(ptkrsp[1]) !== -1){
-                                            ptk = "youtube_self"
+                                            ptk = "youtube_self";
                                         }
                                     } catch(e){
                                         //do nothing
@@ -405,7 +429,7 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
     if (dislikes > 0) {
         dislikesBar.setAttribute("style","width:100%;");
         container.appendChild(dislikesBar);
-    }   
+    }
     switch(ptk){
         case "youtube_none":
         var bartype = 'likesBar';
@@ -419,49 +443,6 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
     }
     dislikesBar.classList.add(bartype);
 
-    // // Checks to see if there are more votes than views, which would mean the view count is wrong.
-    // // We do this because we need an accurate view count to calculate the Power Meter.
-    // // The green/yellow 'pausedBar' lets the user know that we can't make one yet, but at least the likesBar/red ratings bar is still available
-    // if (totalVotes > views) {
-    //     if (likes > 0) {
-    //         pausedBar = document.createElement('div');
-    //         pausedBar.classList.add('pausedBar');
-    //         pausedBar.setAttribute("style","width:"+ (100 * likes / totalVotes) +"%;");
-    //         container.appendChild(pausedBar);
-    //     }
-    //     pausedMsg = '<span class="powerScore"><i>&nbsp;View Count Error&nbsp;</i></span>';
-    // }
-    // else {
-    //     powerMeterScore = powerMeter(views, likes, dislikes);
-    //     if (likes > 0) {
-    //         var likesBar = document.createElement('div');
-    //         likesBar.classList.add('likesBar');
-    //         likesBar.setAttribute("style","width:"+(100 * likes / totalVotes)+"%;");
-    //         container.appendChild(likesBar);
-    //     }
-    //    // shadingBar gives the ratings bar a 3D look when hovered
-    //    // var shadingBar = document.createElement('div');
-    //    //  if ((likes + dislikes) > 0) { shadingBar.classList.add('shadingBar'); }
-    //    // container.appendChild(shadingBar);
-    //    //  if ((100 * likes / totalVotes) < powerMeterScore) {
-    //    //      var hatesBar = document.createElement('div');
-    //    //      hatesBar.classList.add('hatesBar');
-    //    //      hatesBar.setAttribute("style","width:"+(powerMeterScore - (100 * likes / totalVotes))+"%; margin-left: "+(100 * likes / totalVotes)+"%;");
-    //    //      container.appendChild(hatesBar);
-    //    //  }
-    //     // if (powerMeterScore >= 0.0455) {
-    //     //     var powerBar = document.createElement('div');
-    //     //     powerBar.classList.add('powerBar');
-    //     //     if ((100 * likes / totalVotes) > powerMeterScore) {
-    //     //         powerBar.style.width = powerMeterScore+"%";
-    //     //     }
-    //     //     else {
-    //     //         powerBar.style.width = ((100 * likes / totalVotes))+"%";
-    //     //     }
-    //     //     barMsg = '<span class="powerScore">&nbsp;<span style="color:#99ddff">'+ Math.round(powerMeterScore*10)/10 +'</span>&nbsp;</span>';
-    //     //     container.appendChild(powerBar);
-    //     // }
-    // }
     if (likes > 0 || dislikes > 0) {
       var textContainer = document.createElement('span');
       textContainer.classList.add('textContainer');
@@ -476,27 +457,4 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
         node.insertBefore(container,node.childNodes[2]);
         node.classList.add('scanned');
     }
-}
-
-// trade secrets
-function powerMeter(view1, likes, dislikes) {
-    var viewLikeRatio;
-    var views = view1 - dislikes;
-    if (views < 2000) {
-        var viewLikeRatio2k = Math.round( (views + views * ((3000-views)/2000)) / (likes) );
-        if (views < 255) {
-            viewLikeRatio = Math.round( viewLikeRatio2k / (views/255) );
-        }
-        else {
-            viewLikeRatio = viewLikeRatio2k;
-        }
-    }
-    else {
-        viewLikeRatio = Math.round( (views+7000) / 3 / (likes) );
-    }
-    if ((viewLikeRatio < 1) || (viewLikeRatio > 255)) {
-        return 0;
-    }
-    var powerMeterScore = Math.round(Math.pow(((255-viewLikeRatio)/2.55), 3)) / 10000;
-    return powerMeterScore;
 }
