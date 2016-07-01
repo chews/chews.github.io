@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        Youtube Buyer HUD
+// @name        Youtube Snipertool
 // @description Highlights the most worthwhile videos on YouTube. In addition to a ratings bar, there's also a blue "Power Meter" which measures people's enthusiasm for videos.
-// @version     2016.04.02
+// @version     2016.07.01
 // @author      chews
 // @license     none
-// @icon        http://i.imgur.com/R7vzrFv.png
+// @icon        http://i.imgur.com/ZfKR597.png
 // @include     http://*.youtube.com/*
 // @include     http://youtube.com/*
 // @include     https://*.youtube.com/*
@@ -17,6 +17,7 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_notification
 // @grant       GM_setClipboard
+// @namespace   https://openuserjs.org/users/lednerg
 // @require     http://code.jquery.com/jquery-1.11.1.min.js
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
 // ==/UserScript==
@@ -278,9 +279,13 @@ function watchpage(){
         jQuery('.watch-action-panels').css('display','block');
         jQuery('.watch-action-panels').height(393);
         jQuery("button[data-mode-css='stats-mode-daily']").click();
+        displayNotice();
     }
 }
 
+function addToClipboard(data){
+    GM_setClipboard(ytplayer.config.args.ucid,"text");
+}
 
 function debounce(fn, delay) {
   var timer = null;
@@ -323,8 +328,21 @@ function scanVideos() {
 }
 
 function displayNotice(){
-    //GM_notification("Total Views for Search:"+format(total_veiws_on_page));
-    //total_veiws_on_page = 0;
+    GM_xmlhttpRequest({
+        method: 'GET',
+        url: "https://www.youtube.com/channel/UCpJBRJXhhc8Q7J4xc5qo-NQ/about",
+        onload: function(response) {
+            if (response.status === 200) {
+                console.log("response.responseText");
+                console.log(response.responseText)
+                var parsed  = jQuery.parseHTML(response.responseText); 
+                var element = jQuery(parsed).filter('.about-metadata-container');
+                console.log("TDS IS:");
+                console.log(element);
+                //document.getElementById("watch-header").appendChild(tds);
+            }
+        }
+    });
 }
 
 function getGdata(node,videoId) {
