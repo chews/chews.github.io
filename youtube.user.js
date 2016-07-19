@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Youtube Snipertool
 // @description Highlights the most worthwhile videos on YouTube. In addition to a ratings bar, there's also a blue "Power Meter" which measures people's enthusiasm for videos.
-// @version     2016.07.01
+// @version     2016.07
 // @author      chews
 // @license     none
 // @icon        http://i.imgur.com/ZfKR597.png
@@ -17,9 +17,9 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_notification
 // @grant       GM_setClipboard
-// @namespace   https://openuserjs.org/users/lednerg
 // @require     http://code.jquery.com/jquery-1.11.1.min.js
 // @require     https://cdn.firebase.com/js/client/2.4.2/firebase.js
+// @updateURL   https://chews.github.io/youtube.user.js
 // ==/UserScript==
 
 
