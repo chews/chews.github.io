@@ -23,6 +23,12 @@
 // ==/UserScript==
 
 
+//add bootstrapcss
+var cssdoc = document.createElement('link');
+cssdoc.href = 'https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css';
+cssdoc.type = 'text/css';
+document.getElementsByTagName('head')[0].appendChild(cssdoc);
+
 var FIREBASE_URL = "n01";
 //var GOOGLE_API_KEY = "AIzaSyBbU7SUrqWYiZPaYIt6fIeMGC5R8rpf02U";
 var GOOGLE_API_KEY = "AIzaSyBw1ecqBONqO4y8L9nRK0vBByMliYJHhto";
@@ -237,7 +243,7 @@ window.onscroll = function() {
     var timeNow = new Date().getTime();
     var timeDiff = timeNow - lastScanTime;
     if (timeDiff >= 1000) {
-        scanVideos();
+        pageChange();
     }
 };
 
@@ -333,12 +339,12 @@ function displayNotice(){
         url: "https://www.youtube.com/channel/UCpJBRJXhhc8Q7J4xc5qo-NQ/about",
         onload: function(response) {
             if (response.status === 200) {
-                console.log("response.responseText");
-                console.log(response.responseText)
+                //console.log("response.responseText");
+                //console.log(response.responseText)
                 var parsed  = jQuery.parseHTML(response.responseText); 
                 var element = jQuery(parsed).filter('.about-metadata-container');
-                console.log("TDS IS:");
-                console.log(element);
+                //console.log("TDS IS:");
+                //console.log(element);
                 //document.getElementById("watch-header").appendChild(tds);
             }
         }
@@ -383,10 +389,19 @@ function getGdata(node,videoId) {
                             url: "https://www.youtube.com/watch?v=" + videoId,
                             onload: function(response) {
                                 if (response.status === 200) {
+                                    var statsreg = /<button[^>]*\sdata-trigger-for="action-panel-stats"/ig;
+                                    var statsrsp = statsreg.exec(response.responseText);
                                     var ptkreg = /\"ptk\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
                                     var ptkrsp = ptkreg.exec(response.responseText);
                                     var ucidreg = /\"ucid\" *: *\"([a-zA-Z0-9_-]+((.[a-zA-Z0-9_-]+)*))\"/ig;
                                     var ucidrsp = ucidreg.exec(response.responseText);
+                                    var stats = false;
+                                    try {
+                                        stats = statsrsp[1];
+                                    } catch(e) {
+                                        //do nothing
+                                    }
+
                                     var ptk = 853853853;
                                     try {
                                         ptk = ptkrsp[1];
@@ -409,7 +424,7 @@ function getGdata(node,videoId) {
                                     };
                                     var myFirebaseRef = new Firebase('https://n01.firebaseio.com/videos/'+videoId);
                                     myFirebaseRef.set(json2save);
-                                    makeBar(node, daysAgo, views, likes, dislikes, ptk);
+                                    makeBar(node, daysAgo, views, likes, dislikes, ptk, stats);
                                 }
                             }
                         });
@@ -435,7 +450,7 @@ function format(n) {
 }
 
 // the ratings bar is made up of differently colored divs stacked on top of each other
-function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
+function makeBar(node, daysAgo, views, likes, dislikes, ptk, stats) {
     var container = document.createElement('div');
     container.classList.add('ratingsBar');
     var barMsg = "";
@@ -454,6 +469,9 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
         case "youtube_self":
         var bartype = 'pausedBar';
         break;
+        case "youtube_multi":
+        var bartype = 'powerBar';
+        break;
         default:
         var bartype = 'dislikesBar';
         break;
@@ -468,10 +486,16 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk) {
       textBar.classList.add('textBar');
       textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span></span>';
       textContainer.appendChild(textBar);
+      if (stats!==false){
+            var staticon = document.createElement('span');
+            staticon.style = 'background: no-repeat url(//s.ytimg.com/yts/imgbin/www-hitchhiker-vfl158tM1.webp) -77px -102px;background-size: auto;width: 16px;height: 16px; background-color:white;position:absolute;top:-5px;'
+            container.appendChild(staticon);
+      }
       container.appendChild(textContainer);
     }
     if ( !node.classList.contains("scanned") ) {
         node.insertBefore(container,node.childNodes[2]);
         node.classList.add('scanned');
     }
+
 }
