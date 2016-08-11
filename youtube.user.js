@@ -284,8 +284,8 @@ function watchpage(){
         jQuery("button[data-trigger-for='action-panel-stats']").click();
         jQuery('.watch-action-panels').css('display','block');
         jQuery('.watch-action-panels').height(393);
-        jQuery("button[data-mode-css='stats-mode-daily']").click();
-        displayNotice();
+        setTimeout(function(){jQuery("button[data-mode-css='stats-mode-daily']")[0].click();},800);
+        console.log("clicked button");
     }
 }
 
@@ -458,10 +458,9 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk, stats) {
     var pausedBar = false;
     var totalVotes = likes + dislikes;
     var dislikesBar = document.createElement('div');
-    if (dislikes > 0) {
-        dislikesBar.setAttribute("style","width:100%;");
-        container.appendChild(dislikesBar);
-    }
+    dislikesBar.setAttribute("style","width:100%;");
+    container.appendChild(dislikesBar);
+
     switch(ptk){
         case "youtube_none":
         var bartype = 'likesBar';
@@ -478,13 +477,12 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk, stats) {
     }
     dislikesBar.classList.add(bartype);
 
-    if (likes > 0 || dislikes > 0) {
       var textContainer = document.createElement('span');
       textContainer.classList.add('textContainer');
       //if (((likes + dislikes) > 0) && (powerMeterScore < 0.0455 || pausedBar)) {textContainer.classList.add('short');}
       var textBar = document.createElement('span');
       textBar.classList.add('textBar');
-      textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span></span>';
+      textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span><span class="likesScore">&nbsp;-'+ format(daysAgo) +'</span></span>';
       textContainer.appendChild(textBar);
       if (stats!==false){
             var staticon = document.createElement('span');
@@ -492,7 +490,6 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk, stats) {
             container.appendChild(staticon);
       }
       container.appendChild(textContainer);
-    }
     if ( !node.classList.contains("scanned") ) {
         node.insertBefore(container,node.childNodes[2]);
         node.classList.add('scanned');
