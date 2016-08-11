@@ -285,7 +285,7 @@ function watchpage(){
         jQuery('.watch-action-panels').css('display','block');
         jQuery('.watch-action-panels').height(393);
         setTimeout(function(){jQuery("button[data-mode-css='stats-mode-daily']")[0].click();},800);
-        console.log("clicked button");
+        //console.log("clicked button");
     }
 }
 
@@ -482,7 +482,7 @@ function makeBar(node, daysAgo, views, likes, dislikes, ptk, stats) {
       //if (((likes + dislikes) > 0) && (powerMeterScore < 0.0455 || pausedBar)) {textContainer.classList.add('short');}
       var textBar = document.createElement('span');
       textBar.classList.add('textBar');
-      textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span><span class="likesScore">&nbsp;-'+ format(daysAgo) +'</span></span>';
+      textBar.innerHTML = barMsg+pausedMsg +'<span class="ratingsScore">&nbsp;<span class="likesScore">+'+ format(likes) +'&nbsp;</span>/<span class="dislikesScore">&nbsp;-'+ format(dislikes) +'</span></span>';
       textContainer.appendChild(textBar);
       if (stats!==false){
             var staticon = document.createElement('span');
